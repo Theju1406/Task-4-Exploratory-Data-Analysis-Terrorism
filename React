@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import "../index.css";
+import "./tree.css"
 import MenuIcon from '@mui/icons-material/Menu';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CloseIcon from '@mui/icons-material/Close';
@@ -7,6 +8,13 @@ import { CardContent } from '@mui/material';
 import { FlareSharp } from '@mui/icons-material';
 
 function Pricemodel() {
+  const boxStyle = {
+    border: '1px solid #000', // Add a border around the text
+    padding: '2px', // Add some padding for spacing
+    display: 'inline-block',
+     
+    // Make sure the box doesn't take the full width
+  };
  const sidebarRef = useRef(null);
  const boxContainerRef = useRef(null); // Added ref for the box container
  const [isResizing, setIsResizing] = useState(false);
@@ -16,18 +24,19 @@ function Pricemodel() {
  const minSidebarWidthWithText = 100;
  const [isCostPanelresizing, setIsCostPanelresizing] = useState(false);
  const [costPanelWidth, setCostPanelWidth] = useState(300);
- const minCostPanelWidth = 100;
+ const minCostPanelWidth = 50;
 
  const bottomsidebarRef = useRef(null);
  
  
  const [isBottomPanelresizing, setIsBottomPanelresizing] = useState(false);
- const [BottomPanelheight, setBottomPanelheight] = useState(300); // Corrected variable name
+ const [BottomPanelheight, setBottomPanelheight] = useState(145); // Corrected variable name
  const minBottomPanelheight = 100; // Corrected variable name
  const [isCollapsed,setIsCollapsed]=useState(false);
  const [isFormulaBarVisible, setFormulaBarVisible] = useState(false);
  const [isReferenceVisible, setReferenceVisible] = useState(false);
  const [isBottomSidebarOpen, setBottomSidebarOpen] = useState(true);
+ const [isOpen,setIsOpen]=useState(true);
 
  const showFormulaBar = () => {
   setFormulaBarVisible(true);
@@ -44,6 +53,9 @@ const showReference = () => {
 const closeBottomSidebar = () => {
   setBottomSidebarOpen(false);
 };
+const openbottombar=()=>{
+  setIsOpen(true);
+}
  
  
  const startResizing = React.useCallback((mouseDownEvent) => {
@@ -213,7 +225,7 @@ const startBottomPanelResizing = (mouseDownEvent) => {
  
 
  return (
-  <div className="app-container">
+   <div className="app-container">
    <div
     ref={sidebarRef}
     className={`app-sidebar ${isCollapsed?'collapsed':``}`}
@@ -252,13 +264,48 @@ const startBottomPanelResizing = (mouseDownEvent) => {
    </div>
    
    <div className="app-frame">
+   <div  className="centered-text">
+         <h1>Price Model-Workbench</h1>
+         </div>
+       <div  className='tree'>
+      <ul>
+        <li> 
+          <div style={boxStyle} className='centered-text'><h5>Price Model Header/ Total Invoice Price </h5></div>
+        
+        <ul>
+        
+          <li> <div style={boxStyle} >Total material</div>
+            <ul>
+              <li><div style={boxStyle} > Raw material</div></li>
+              <li><div style={boxStyle}>Packaging</div></li>
+            </ul>
+          </li>
+          <li> <div style={boxStyle}>Conversion and Fees</div>
+            <ul>
+              <li><div style={boxStyle}> Manufacturing</div></li>
+              <li><div style={boxStyle}> Labor</div></li>
+              <li><div style={boxStyle}> Fees</div></li>
+            </ul>
+          </li>
+          <li> <div style={boxStyle}>Logistics</div> 
+            <ul>
+              <li><div style={boxStyle}> Transportation</div></li>
+              <li><div style={boxStyle}>Warehousing</div></li>
+            </ul>
+          </li>
+         
+         
+        </ul>
+        </li>
+        </ul>
+       </div>
    
     {isBottomSidebarOpen&&(
  
     <div
         ref={bottomsidebarRef}
         className={`bottom-app-sidebar vertical ${isCollapsed ? 'collapsed' : ''}`}
-        style={{ height: BottomPanelheight }}
+        style={{ height: BottomPanelheight ,width:"650px"}}
         onMouseDown={(e) => e.preventDefault()}
       >
         
@@ -266,13 +313,13 @@ const startBottomPanelResizing = (mouseDownEvent) => {
         <div className="bottom-app-sidebar-content">
           <div className='bottom-box' style={{height:"30px",width:"800px",display:"flex"}}>
             <h6 style={{color:"white"}} onClick={showFormulaBar}>Formula Bar</h6>
-            <h6 style={{color:"white",marginLeft:"10px"}} onClick={showReference}>Reference Material</h6>
-        <CloseIcon style={{marginLeft:"500px",color:"white"}} onClick={closeBottomSidebar}/>
+            <h6 style={{color:"white",marginLeft:"20px"}} onClick={showReference}>Reference Material</h6>
+        <CloseIcon style={{marginLeft:"350px",color:"white"}} onClick={closeBottomSidebar}/>
 
             </div>
 
             {isFormulaBarVisible && (
-        <div className="text-center mt-5">
+        <div className="text-center mt-1">
           <h6 style={{ alignItems: "center", color: "black" }}>Formula Bar</h6>
           <h6>
             <i>ability to modify formula of child elements</i>
@@ -281,7 +328,7 @@ const startBottomPanelResizing = (mouseDownEvent) => {
         </div>
       )}
 
-        {isReferenceVisible&&(<div className='text-center mt-5'> <h6 style={{alighItem:"center",color: "black"}} >
+        {isReferenceVisible&&(<div className='text-center mt-1'> <h6 style={{alighItem:"center",color: "black"}} >
             Reference Material(92154554)
            </h6>
            <h6>
@@ -343,13 +390,12 @@ const startBottomPanelResizing = (mouseDownEvent) => {
     
 
 
-  </div>
+   </div>
   
  );
 }
 
 export default Pricemodel;
-
 
 body {
   margin: 0;
@@ -398,7 +444,7 @@ code {
   max-height: 100%;
   background: #ffffff;
   box-shadow: 8px 2px 32px -2px rgba(0, 0, 0, 0.25);
-  border-radius: 0px 10px 10px 0px;
+ 
   z-index: 1;
 }
 
@@ -450,9 +496,10 @@ code {
   flex-direction: row;
   background: #ffffff;
   box-shadow: -8px 2px 22px -7px rgba(0, 0, 0, 0.25);
-  border-radius: 10px 0px 0px 10px;
+  border-radius: 0px 10px 10px 0px;
   z-index: 2;
   overflow: hidden;
+  padding-right: 20px;
  
 }
 
@@ -471,6 +518,7 @@ code {
   resize: horizontal;
   overflow: hidden;
   position: "relative"
+  
 }
 
 .right-app-sidebar .right-app-sidebar-resizer:hover {
@@ -487,8 +535,7 @@ code {
   width:"100px"
  }
 
- /* Update styles for the horizontal sidebar */
-.bottom-app-sidebar {
+ .bottom-app-sidebar {
   flex-grow: 1; /* Grow horizontally */
   flex-shrink: 0;
   min-height: 50px; /* Adjust the height as needed */
@@ -496,12 +543,13 @@ code {
   
   flex-direction: column; /* Set the direction to horizontal */
   background: #ffffff;
-  box-shadow: 2px 8px 22px -7px rgba(0, 0, 0, 0.25); /* Update shadow */
-  border-radius: 0px 10px 10px 0px;
+  box-shadow: 2px 8px 22px -7px rgba(0, 0, 0, 0.25); 
+  border-radius: 0px 0px 0px 0px;/* Update shadow */
+ 
  
   overflow: hidden;
   position: "relative";
-  margin-top: 420px;
+  margin-top: 63px;
   background-color: cadetblue;
 }
 

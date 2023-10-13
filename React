@@ -3,6 +3,8 @@ import "../index.css";
 import MenuIcon from '@mui/icons-material/Menu';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CloseIcon from '@mui/icons-material/Close';
+import { CardContent } from '@mui/material';
+import { FlareSharp } from '@mui/icons-material';
 
 function Pricemodel() {
  const sidebarRef = useRef(null);
@@ -15,7 +17,34 @@ function Pricemodel() {
  const [isCostPanelresizing, setIsCostPanelresizing] = useState(false);
  const [costPanelWidth, setCostPanelWidth] = useState(300);
  const minCostPanelWidth = 100;
+
+ const bottomsidebarRef = useRef(null);
+ 
+ 
+ const [isBottomPanelresizing, setIsBottomPanelresizing] = useState(false);
+ const [BottomPanelheight, setBottomPanelheight] = useState(300); // Corrected variable name
+ const minBottomPanelheight = 100; // Corrected variable name
  const [isCollapsed,setIsCollapsed]=useState(false);
+ const [isFormulaBarVisible, setFormulaBarVisible] = useState(false);
+ const [isReferenceVisible, setReferenceVisible] = useState(false);
+ const [isBottomSidebarOpen, setBottomSidebarOpen] = useState(true);
+
+ const showFormulaBar = () => {
+  setFormulaBarVisible(true);
+  setReferenceVisible(false);
+  setBottomSidebarOpen(true);
+};
+
+const showReference = () => {
+  setFormulaBarVisible(false);
+  setReferenceVisible(true);
+  setBottomSidebarOpen(true);
+};
+
+const closeBottomSidebar = () => {
+  setBottomSidebarOpen(false);
+};
+ 
  
  const startResizing = React.useCallback((mouseDownEvent) => {
   setIsResizing(true);
@@ -67,6 +96,35 @@ function Pricemodel() {
     }
 }
 
+const startBottomPanelResizing = (mouseDownEvent) => {
+    setIsBottomPanelresizing({
+      initialHeight: BottomPanelheight,
+      mouseY: mouseDownEvent.clientY,
+    });
+  };
+  
+  const stopBottomPanelResizing = () => {
+    setIsBottomPanelresizing(false);
+  };
+  
+  const toggleBottomPanel = () => {
+    if (BottomPanelheight <= minBottomPanelheight) {
+      setBottomPanelheight(300); // Set the desired maximum height when expanded
+    } else {
+      setBottomPanelheight(minBottomPanelheight); // Set the minimum height when collapsed
+    }
+  };
+
+   
+  const toggleBottomPanelclose = () => {
+    if (BottomPanelheight > minBottomPanelheight) {
+      // If the sidebar is at the minimum width, expand it
+      setBottomPanelheight(50); // Set the desired width when expanded
+    } else {
+        setIsBottomPanelresizing(isBottomPanelresizing);
+    }
+}
+  
 
  const resize = React.useCallback(
   (mouseMoveEvent) => {
@@ -92,6 +150,26 @@ function Pricemodel() {
     },
     [isCostPanelresizing]
   );
+
+  const bottomresize = (mouseMoveEvent) => {
+    if (isBottomPanelresizing) {
+      const mouseX = mouseMoveEvent.clientX;
+      const initialX = isBottomPanelresizing.mouseX;
+      const deltaX = mouseX - initialX;
+
+      let newWidth = isBottomPanelresizing.initialWidth + deltaX;
+
+      // Ensure the new width doesn't go below the minimum or above the maximum
+      newWidth = Math.max(minBottomPanelheight, newWidth);
+      newWidth = Math.min(200, newWidth); // Set the maximum width as needed
+
+      setBottomPanelheight(newWidth);
+    }
+  };
+  
+  
+  
+  
   
   
 
@@ -122,6 +200,16 @@ function Pricemodel() {
    window.removeEventListener("mouseup", stopCostPanelResizing);
   };
  }, [costresize, stopCostPanelResizing]);
+
+ React.useEffect(() => {
+    window.addEventListener("mousemove", bottomresize);
+    window.addEventListener("mouseup", stopBottomPanelResizing);
+  
+    return () => {
+      window.removeEventListener("mousemove", bottomresize);
+      window.removeEventListener("mouseup", stopBottomPanelResizing);
+    };
+  }, []);
  
 
  return (
@@ -155,15 +243,63 @@ function Pricemodel() {
        <MenuIcon onClick={togglesidePanel}/>)
       }
 
-      
+
      </div>
      
      
     </div>
     <div className="app-sidebar-resizer" onMouseDown={startResizing} />
    </div>
-   <div className="app-frame" >
-    </div>
+   
+   <div className="app-frame">
+   
+    {isBottomSidebarOpen&&(
+ 
+    <div
+        ref={bottomsidebarRef}
+        className={`bottom-app-sidebar vertical ${isCollapsed ? 'collapsed' : ''}`}
+        style={{ height: BottomPanelheight }}
+        onMouseDown={(e) => e.preventDefault()}
+      >
+        
+       
+        <div className="bottom-app-sidebar-content">
+          <div className='bottom-box' style={{height:"30px",width:"800px",display:"flex"}}>
+            <h6 style={{color:"white"}} onClick={showFormulaBar}>Formula Bar</h6>
+            <h6 style={{color:"white",marginLeft:"10px"}} onClick={showReference}>Reference Material</h6>
+        <CloseIcon style={{marginLeft:"500px",color:"white"}} onClick={closeBottomSidebar}/>
+
+            </div>
+
+            {isFormulaBarVisible && (
+        <div className="text-center mt-5">
+          <h6 style={{ alignItems: "center", color: "black" }}>Formula Bar</h6>
+          <h6>
+            <i>ability to modify formula of child elements</i>
+          </h6>
+          <h6>Raw Materials = Sum of (Feedstock 1, Feedstock 2, ...)</h6>
+        </div>
+      )}
+
+        {isReferenceVisible&&(<div className='text-center mt-5'> <h6 style={{alighItem:"center",color: "black"}} >
+            Reference Material(92154554)
+           </h6>
+           <h6>
+           <i>slow current calculation based on selected element</i> 
+           </h6>
+           <h6>Raw Material Cost=Sum of(Feedstock 1(3.5), Feedstock 2(5.0))</h6>
+           </div>)}
+           
+
+         
+        </div>
+      </div>
+      )}
+      </div>
+   
+     
+
+
 
    <div
     ref={costsidebarRef}
@@ -212,7 +348,10 @@ function Pricemodel() {
  );
 }
 
-export default Pricemodel;body {
+export default Pricemodel;
+
+
+body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -347,3 +486,80 @@ code {
   height:"10px";
   width:"100px"
  }
+
+ /* Update styles for the horizontal sidebar */
+.bottom-app-sidebar {
+  flex-grow: 1; /* Grow horizontally */
+  flex-shrink: 0;
+  min-height: 50px; /* Adjust the height as needed */
+  max-height: 200px; /* Adjust the maximum height as needed */
+  
+  flex-direction: column; /* Set the direction to horizontal */
+  background: #ffffff;
+  box-shadow: 2px 8px 22px -7px rgba(0, 0, 0, 0.25); /* Update shadow */
+  border-radius: 0px 10px 10px 0px;
+ 
+  overflow: hidden;
+  position: "relative";
+  margin-top: 420px;
+  background-color: cadetblue;
+}
+
+.bottom-app-sidebar .bottom-app-sidebar-content {
+  flex: 1;
+ 
+
+  overflow: hidden;
+  position: "relative";
+ 
+}
+
+.bottom-app-sidebar .bottom-app-sidebar-resizer {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 6px;
+  cursor: ns-resize; /* Use "ns-resize" to make it resize vertically */
+  position: relative;
+  margin-top: -3px; /* Adjust this value as needed to position it correctly at the top */
+  margin-left: auto;
+  margin-right: auto;
+  overflow: hidden;
+}
+
+
+
+
+
+.bottom-right-app-sidebar .bottom-right-app-sidebar-resizer:hover {
+  width: 3px;
+  background: #c1c3c5b4;
+  
+  
+}
+
+.bottom-box {
+  background-color: #0e0d0d;
+  padding: 4px;
+  overflow: hidden;
+  
+  
+ 
+ }
+
+
+
+
+
+
+
+ 
+
+
+
+
+.bottom-app-sidebar .bottom-app-sidebar-resizer:hover {
+  width: 3px;
+  background: #c1c3c5b4;
+  
+  
+}

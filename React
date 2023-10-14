@@ -223,14 +223,15 @@ const startBottomPanelResizing = (mouseDownEvent) => {
   };
  }, [costresize, stopCostPanelResizing]);
 
- React.useEffect(() => {
-  window.addEventListener("mousemove", costresize);
-  window.addEventListener("mouseup", stopCostPanelResizing);
-  return () => {
-    window.removeEventListener("mousemove", costresize);
-    window.removeEventListener("mouseup", stopCostPanelResizing);
-  };
-}, [costresize, stopCostPanelResizing]);
+React.useEffect(() => {
+    window.addEventListener("mousemove", bottomresize);
+    window.addEventListener("mouseup", stopBottomPanelResizing);
+  
+    return () => {
+      window.removeEventListener("mousemove", bottomresize);
+      window.removeEventListener("mouseup", stopBottomPanelResizing);
+    };
+  }, []);
  
 
  return (

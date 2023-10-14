@@ -22,8 +22,9 @@ function Pricemodel() {
 
  const costsidebarRef = useRef(null);
  const minSidebarWidthWithText = 100;
- const [isCostPanelresizing, setIsCostPanelresizing] = useState(false);
- const [costPanelWidth, setCostPanelWidth] = useState(300);
+ const [isCostPanelresizing, setIsCostPanelresizing] = useState({ resizing: false, initialX: 0 });
+
+ const [costPanelWidth, setCostPanelWidth] = useState(261);
  const minCostPanelWidth = 50;
 
  const bottomsidebarRef = useRef(null);
@@ -62,17 +63,20 @@ const openbottombar=()=>{
   setIsResizing(true);
  }, []);
 
- const startCostPanelResizing =React.useCallback( (mouseDownEvent) => {
-  setIsCostPanelresizing(true);
- },[]);
+ const startCostPanelResizing = (mouseDownEvent) => {
+  setIsCostPanelresizing({
+    resizing: true,
+    initialX: mouseDownEvent.clientX,
+  });
+};
 
  const stopResizing = React.useCallback(() => {
   setIsResizing(false);
  }, []);
 
- const stopCostPanelResizing = React.useCallback(() => {
-  setIsCostPanelresizing(false);
- },[]);
+ const stopCostPanelResizing = () => {
+  setIsCostPanelresizing({ resizing: false, initialX: 0 });
+};
 
 
  const togglesidePanel = () => {
@@ -150,18 +154,24 @@ const startBottomPanelResizing = (mouseDownEvent) => {
   },
   [isResizing]
  );
- const costresize = React.useCallback(
-    (mouseMoveEvent) => {
-      if (isCostPanelresizing) {
-        const newWidth =
-          costsidebarRef.current.getBoundingClientRect().right - mouseMoveEvent.clientX;
-       
-          setCostPanelWidth(newWidth);
-        
-      }
-    },
-    [isCostPanelresizing]
-  );
+
+ const costresize = (mouseMoveEvent) => {
+  if (isCostPanelresizing.resizing) {
+    const mouseX = mouseMoveEvent.clientX;
+    const initialX = isCostPanelresizing.initialX;
+    const deltaX = mouseX - initialX;
+
+    let newWidth = costPanelWidth - deltaX;
+
+    // Ensure the new width doesn't go below the minimum or above the maximum
+    newWidth = Math.max(minCostPanelWidth, newWidth);
+    newWidth = Math.min(300, newWidth);
+
+    setCostPanelWidth(newWidth);
+    isCostPanelresizing.initialX = mouseX;
+  }
+};
+
 
   const bottomresize = (mouseMoveEvent) => {
     if (isBottomPanelresizing) {
@@ -214,14 +224,13 @@ const startBottomPanelResizing = (mouseDownEvent) => {
  }, [costresize, stopCostPanelResizing]);
 
  React.useEffect(() => {
-    window.addEventListener("mousemove", bottomresize);
-    window.addEventListener("mouseup", stopBottomPanelResizing);
-  
-    return () => {
-      window.removeEventListener("mousemove", bottomresize);
-      window.removeEventListener("mouseup", stopBottomPanelResizing);
-    };
-  }, []);
+  window.addEventListener("mousemove", costresize);
+  window.addEventListener("mouseup", stopCostPanelResizing);
+  return () => {
+    window.removeEventListener("mousemove", costresize);
+    window.removeEventListener("mouseup", stopCostPanelResizing);
+  };
+}, [costresize, stopCostPanelResizing]);
  
 
  return (
@@ -305,16 +314,16 @@ const startBottomPanelResizing = (mouseDownEvent) => {
     <div
         ref={bottomsidebarRef}
         className={`bottom-app-sidebar vertical ${isCollapsed ? 'collapsed' : ''}`}
-        style={{ height: BottomPanelheight ,width:"650px"}}
+        style={{ height: BottomPanelheight}}
         onMouseDown={(e) => e.preventDefault()}
       >
         
        
-        <div className="bottom-app-sidebar-content">
-          <div className='bottom-box' style={{height:"30px",width:"800px",display:"flex"}}>
-            <h6 style={{color:"white"}} onClick={showFormulaBar}>Formula Bar</h6>
-            <h6 style={{color:"white",marginLeft:"20px"}} onClick={showReference}>Reference Material</h6>
-        <CloseIcon style={{marginLeft:"350px",color:"white"}} onClick={closeBottomSidebar}/>
+        <div className="bottom-app-sidebar-content" style={{disply:"flex"}}>
+          <div className='bottom-box' style={{height:"30px",display:"flex"}} ref={bottomsidebarRef}>
+            <h6 style={{color:"white"}}  onClick={showFormulaBar}>Formula Bar</h6>
+            <h6 style={{color:"white",marginLeft:"20px"}}  onClick={showReference}>Reference Material</h6>
+            <CloseIcon className="close-icon" style={{marginLeft: sidebarWidth, marginRight:costPanelWidth+20}} onClick={closeBottomSidebar} />
 
             </div>
 
@@ -347,44 +356,45 @@ const startBottomPanelResizing = (mouseDownEvent) => {
      
 
 
-
-   <div
-    ref={costsidebarRef}
-    className="right-app-sidebar"
-    style={{ width:costPanelWidth}}
-    onMouseDown={(e) => e.preventDefault()}
-   >
-     <div className="right-app-sidebar-resizer" onMouseDown={startCostPanelResizing} />
-    <div className="right-app-sidebar-content">
-     <div
+      <div
+  ref={costsidebarRef}
+  className="right-app-sidebar"
+  style={{
+    width: costPanelWidth,
+    right: `calc(100% - ${sidebarWidth + costPanelWidth}px)`
+  }}
+  onMouseDown={(e) => e.preventDefault()}
+>
+  <div className="right-app-sidebar-resizer" onMouseDown={startCostPanelResizing} />
+  
+  <div className="right-app-sidebar-content">
+    <div
       className='logotext'
-      style={{ textAlign: 'center', marginRight: costPanelWidth > minCostPanelWidth ? "6px" : "10px" }}
-     >
-      {costPanelWidth>minCostPanelWidth || isCostPanelresizing ? (
-       <div
-        className="right-heading-box mt-1"
-        style={{
-         display: 'flex',
-         alignItems: 'center',
-         width: { costPanelWidth },
-         position: "relative",
-         background: "linear-gradient(90deg,rgb(50,30,100) 20%,rgb(0,0,0) 100%",
-        }}
-       >
-        <MenuIcon style={{ marginRight: '10px', color: "white" }} onClick={togglecostPanelclose}/>
-        <h6 className="mt-2" style={{ marginRight: "10px", color: "White" }}>Costing Panel</h6>
-       </div>
+      style={{ textAlign: 'center', marginLeft: costPanelWidth > minCostPanelWidth ? "6px" : "10px" }}
+    >
+      {costPanelWidth > minCostPanelWidth || isCostPanelresizing ? (
+        <div
+          className="right-heading-box mt-1"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            width: costPanelWidth,
+            position: "relative",
+            background: "linear-gradient(90deg,rgb(50,30,100) 20%,rgb(0,0,0) 100%",
+          }}
+        >
+          <MenuIcon style={{ marginRight: '10px', color: "white" }} onClick={togglecostPanelclose} />
+          <h6 className="mt-2" style={{ marginLeft: "10px", color: "White" }}>Costing Panel</h6>
+        </div>
       ) : (
-        
-          <MenuIcon onClick={toggleCostPanel}/>
-          )
-      }
-     </div>
-     
-     
+        <MenuIcon onClick={toggleCostPanel} />
+      )}
     </div>
-    
-   </div>
+  </div>
+</div>
+
+
+  
    
   
     
@@ -396,6 +406,7 @@ const startBottomPanelResizing = (mouseDownEvent) => {
 }
 
 export default Pricemodel;
+
 
 body {
   margin: 0;
@@ -413,12 +424,20 @@ code {
 
 .app-container {
   min-height: 100vh;
-  padding: 1em 1em;
+  padding: 1rem;
+
   display: flex;
   flex-direction: row;
   height: 100vh;
-}
 
+}
+.container{
+  min-height: 100vh;
+
+ 
+  height: 100vh;
+
+}
 .app-sidebar {
   flex-grow: 0;
   flex-shrink: 0;
@@ -541,7 +560,7 @@ code {
   min-height: 50px; /* Adjust the height as needed */
   max-height: 200px; /* Adjust the maximum height as needed */
   
-  flex-direction: column; /* Set the direction to horizontal */
+  flex-direction: row; /* Set the direction to horizontal */
   background: #ffffff;
   box-shadow: 2px 8px 22px -7px rgba(0, 0, 0, 0.25); 
   border-radius: 0px 0px 0px 0px;/* Update shadow */
@@ -549,7 +568,7 @@ code {
  
   overflow: hidden;
   position: "relative";
-  margin-top: 63px;
+  margin-top: 200px;
   background-color: cadetblue;
 }
 
@@ -566,12 +585,9 @@ code {
   flex-grow: 0;
   flex-shrink: 0;
   flex-basis: 6px;
-  cursor: ns-resize; /* Use "ns-resize" to make it resize vertically */
-  position: relative;
-  margin-top: -3px; /* Adjust this value as needed to position it correctly at the top */
-  margin-left: auto;
-  margin-right: auto;
+  cursor: ew-resize; /* Set cursor to "ew-resize" for horizontal resizing */
   overflow: hidden;
+  position: relative;
 }
 
 
@@ -611,86 +627,10 @@ code {
   
   
 }
-
-.tree ul {
-    padding-top: 20px; position: relative;
-    
-    transition: all 0.5s;
-    -webkit-transition: all 0.5s;
-    -moz-transition: all 0.5s;
-}
-
-.tree li {
-    float: left; text-align: center;
-    list-style-type: none;
-    position: relative;
-    padding: 20px 5px 0 5px;
-    
-    transition: all 0.5s;
-    -webkit-transition: all 0.5s;
-    -moz-transition: all 0.5s;
-}
-
-.tree li::before, .tree li::after{
-    content: '';
-    position: absolute; top: 0; right: 50%;
-    border-top: 1px solid #100101;
-    width: 50%; height: 20px;
-}
-.tree li::after{
-    right: auto; left: 50%;
-    border-left: 1px solid #121111;
-}
-
-.tree li:only-child::after, .tree li:only-child::before {
-    display: none;
-}
-
-.tree li:only-child{ padding-top: 0;}
-
-.tree li:first-child::before, .tree li:last-child::after{
-    border: 0 none;
-}
-.tree li:last-child::before{
-    border-right: 1px solid #140d0d;
-    border-radius: 0 5px 0 0;
-    -webkit-border-radius: 0 5px 0 0;
-    -moz-border-radius: 0 5px 0 0;
-}
-.tree li:first-child::after{
-    border-radius: 5px 0 0 0;
-    -webkit-border-radius: 5px 0 0 0;
-    -moz-border-radius: 5px 0 0 0;
-}
-.tree ul ul::before{
-    content: '';
-    position: absolute; top: 0; left: 50%;
-    border-left: 1px solid #110d0d;
-    width: 0; height: 20px;
-}
-.tree li div{
-    border: 1px solid #145273;
-    padding: 5px 60px;
-    text-decoration: none;
-    color: #472472;
-    font-family: arial, verdana, tahoma;
-    font-size: 11px;
-    display: inline-block;
-    
-    border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    
-    transition: all 0.5s;
-    -webkit-transition: all 0.5s;
-    -moz-transition: all 0.5s;
-}
-.tree li div:hover, .tree li div:hover+ul li div {
-    background: #58a3d9; color: #000; border: 1px solid #616a7a;
-}
-.tree li div:hover+ul li::after, 
-.tree li div:hover+ul li::before, 
-.tree li div:hover+ul::before, 
-.tree li div:hover+ul ul::before{
-    border-color:  #090a0c;
+.close-icon {
+  color: white;
+  /* Add the following styles to adjust its position */
+  position: absolute;
+  right: 10px; /* Set the initial position */
+  transition: right 0.3s; /* Add a transition for smooth movement */
 }

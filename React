@@ -6,6 +6,94 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CloseIcon from '@mui/icons-material/Close';
 import { CardContent } from '@mui/material';
 import { FlareSharp } from '@mui/icons-material';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+
+
+
+// const DraggableSidebarElement = ({ name, onDragStart }) => {
+//   const [{ isDragging }, drag] = useDrag({
+//     type: "SIDEBAR_ELEMENT",
+//     item: { name },
+//     end: (item, monitor) => {
+//       const dropResult = monitor.getDropResult();
+//       if (dropResult) {
+//         // Handle the drop here
+//         onDragStart(item, dropResult);
+//       }
+//     },
+//     collect: (monitor) => ({
+//       isDragging: monitor.isDragging(),
+//     }),
+//   });
+
+//   return (
+//     <div
+//       ref={drag}
+//       className={`sidebar-element${isDragging ? " dragging" : ""}`}
+//     >
+//       {name}
+//     </div>
+//   );
+// };
+
+const DraggableSidebarElement = ({ name }) => {
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: "SIDEBAR_ELEMENT",
+    item: { name },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  }));
+
+  return (
+    <div
+      className="sidebar-element"
+      ref={drag}
+    >
+      {name}
+    </div>
+  );
+};
+
+
+
+
+
+const DraggableAppFrameElement = ({ name }) => {
+  const [, drop] = useDrop({
+    accept: "SIDEBAR_ELEMENT",
+    drop: () => ({ name }),
+  });
+
+  return (
+    <div ref={drop} className="app-frame-element">
+      {name}
+    </div>
+  );
+};
+
+
+ 
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function Pricemodel() {
   const boxStyle = {
@@ -38,6 +126,25 @@ function Pricemodel() {
  const [isReferenceVisible, setReferenceVisible] = useState(false);
  const [isBottomSidebarOpen, setBottomSidebarOpen] = useState(true);
  const [isOpen,setIsOpen]=useState(true);
+ const [sidebarElements, setSidebarElements] = useState([
+  "Materials",
+  "Feedstock",
+  "Fees",
+  "Conversion",
+  "Equipment",
+  "Energy",
+  "Logistics",
+  "Lane",
+  "Warehousing",
+]);
+
+const handleDragStart = (draggedItem, dropResult) => {
+  // Handle the dropped item here, and update the sidebar elements.
+  const updatedSidebarElements = sidebarElements.filter(
+    (element) => element !== draggedItem.name
+  );
+  setSidebarElements(updatedSidebarElements);
+};
 
  const showFormulaBar = () => {
   setFormulaBarVisible(true);
@@ -223,19 +330,11 @@ const startBottomPanelResizing = (mouseDownEvent) => {
   };
  }, [costresize, stopCostPanelResizing]);
 
-React.useEffect(() => {
-    window.addEventListener("mousemove", bottomresize);
-    window.addEventListener("mouseup", stopBottomPanelResizing);
-  
-    return () => {
-      window.removeEventListener("mousemove", bottomresize);
-      window.removeEventListener("mouseup", stopBottomPanelResizing);
-    };
-  }, []);
- 
+
 
  return (
    <div className="app-container">
+     <DndProvider backend={HTML5Backend}>
    <div
     ref={sidebarRef}
     className={`app-sidebar ${isCollapsed?'collapsed':``}`}
@@ -248,6 +347,7 @@ React.useEffect(() => {
       style={{ textAlign: 'center', marginLeft: sidebarWidth > minSidebarWidthWithText ? "6px" : "10px" }}
      >
       {sidebarWidth > minSidebarWidthWithText || isResizing || isCollapsed? (
+        <div>
        <div
         className="heading-box mt-1"
         style={{
@@ -261,12 +361,21 @@ React.useEffect(() => {
         <MenuIcon style={{ marginRight: '10px', color: "white" }} onClick={togglesidePanelclose}/>
         <h6 className="mt-2" style={{ marginLeft: "10px", color: "White" }}>Price Model</h6>
        </div>
+
+       <div className="sidebar-elements">
+  {sidebarElements.map((element) => (
+    <DraggableSidebarElement key={element} name={element} />
+  ))}
+</div>
+      </div>
+
       ) : (
        <MenuIcon onClick={togglesidePanel}/>)
       }
 
 
      </div>
+    
      
      
     </div>
@@ -309,7 +418,7 @@ React.useEffect(() => {
         </li>
         </ul>
        </div>
-   
+      
     {isBottomSidebarOpen&&(
  
     <div
@@ -362,7 +471,7 @@ React.useEffect(() => {
   className="right-app-sidebar"
   style={{
     width: costPanelWidth,
-    right: `calc(100% - ${sidebarWidth + costPanelWidth}px)`
+    
   }}
   onMouseDown={(e) => e.preventDefault()}
 >
@@ -393,7 +502,7 @@ React.useEffect(() => {
     </div>
   </div>
 </div>
-
+</DndProvider>
 
   
    
@@ -401,6 +510,7 @@ React.useEffect(() => {
     
 
 
+  
    </div>
   
  );
@@ -471,7 +581,9 @@ code {
 .app-sidebar .app-sidebar-content {
   flex: 1;
   overflow: hidden;
-  position: "relative"
+  position: "relative";
+  align-items: "center";
+margin-left: "20px";
 }
 
 .app-sidebar .app-sidebar-resizer {
@@ -635,3 +747,43 @@ code {
   right: 10px; /* Set the initial position */
   transition: right 0.3s; /* Add a transition for smooth movement */
 }
+
+.sidebar-elements {
+  padding: 10px 10px; /* Adjust the padding as needed */
+  
+}
+
+/* CSS for the individual sidebar element boxes */
+.sidebar-element {
+  background-color: #f0f0f0; /* Background color of the boxes */
+  border: 1px solid #ccc; /* Border style */
+  padding: 5px; /* Padding inside the boxes */
+  margin: 5px 5px; /* Margin between boxes */
+  cursor: move; /* Change cursor to pointer when hovering over boxes */
+  border-radius: 5px; /* Add some border radius for rounded corners */
+  transition: background-color 0.3s; /* Smooth background color transition on hover */
+  display: inline-block;
+  /* Reduce the width to 150px */
+  width: 120px;
+ 
+
+
+  /* Text style inside the boxes */
+  color: #333; /* Text color */
+  font-weight: bold; /* Text font weight */
+  text-align: center; /* Center text horizontally */
+}
+
+
+
+/* CSS for hover effect on the boxes */
+.sidebar-element:hover {
+  background-color: #ddd; /* Background color on hover */
+}
+.sidebar-element:active {
+  cursor: grabbing;
+}
+
+
+
+

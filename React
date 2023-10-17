@@ -784,6 +784,684 @@ margin-left: "20px";
   cursor: grabbing;
 }
 
+import React,{ useState } from 'react';
 
+import './App.css';
+
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+
+ 
+
+const initialItems = [
+
+ {id: 'item-1', content:'Item 1' },
+
+ {id: 'item-2', content:'Item 2' },
+
+ {id: 'item-3', content:'Item 3' },
+
+ // add more items if needed
+
+];
+
+ 
+
+const initialTables = {
+
+ table1: [],
+
+ table2: [],
+
+};
+
+ 
+
+function App() {
+
+ const [items, setItems] = useState(initialItems);
+
+ const [tables,setTables] = useState(initialTables);
+
+ 
+
+ const onDragEnd = (result) => {
+
+   if (!result.destination) return;
+
+ 
+
+   const { source, destination } = result;
+
+   const draggedItem = items.find((item) => item.id === result.draggable.Id);
+
+   if (source.droppableId === destination.droppableId){
+
+     //reordering within same list
+
+     const newItems =[...items];
+
+     newItems.splice(source.index, 1);
+
+     newItems.splice(destination.index,0,draggedItem);
+
+     setItems(newItems);
+
+ 
+
+   } else {
+
+     //moving from one table to another
+
+     const newTables = { ...tables };
+
+     newTables[destination.droppableId] = [
+
+       ...tables[destination.droppableId],
+
+       draggedItem,
+
+     ];
+
+     setTables(newTables);
+
+ 
+
+   }
+
+ };
+
+ return(
+
+   <div className="App">
+
+     <h1> Drag and Drop example</h1>
+
+     <div className="container">
+
+       <Droppable droppableId="items" direction= "vertical">
+
+         {(provided)=>(
+
+           <div
+
+           ref={provided.innerRef}
+
+           {...provided.droppableProps}
+
+           className="items-list"
+
+           >
+
+             {items.map((item, index)=>(
+
+               <Draggable key={item.id} draggableId={item.id} index={index}>
+
+                 {(provided)=> (
+
+                   <div
+
+                   ref={provided.innerRef}
+
+                   {...provided.draggableProps}
+
+                   {...provided.dragHandleProps}
+
+                   className="item"
+
+                   >
+
+                     {item.content}
+
+                   </div>
+
+                 )}
+
+               </Draggable>
+
+             ))}
+
+             {provided.placeholder}
+
+             </div>
+
+         )}
+
+       </Droppable>
+
+     <div className="tables">
+
+       <Droppable droppableId="table1" direction="vertical">
+
+         {(provided) => (
+
+           <div
+
+           ref={provided.innerRef}
+
+           {...provided.droppableProps}
+
+           className="table"
+
+           >
+
+             <h2> Table 1</h2>
+
+             {tables.table1.map((item, index)=>(
+
+               <div key={item.id} className="table-item">
+
+                 {item.content}
+
+                 </div>
+
+             ))}
+
+             {provided.placeholder}
+
+           </div>
+
+         )}
+
+       </Droppable>
+
+       <Droppable droppableId="table2" direction="vertical">
+
+         {(provided) => (
+
+           <div
+
+           ref={provided.innerRef}
+
+           {...provided.droppableProps}
+
+           className="table"
+
+           >
+
+             <h2> Table 2</h2>
+
+             {tables.table2.map((item, index)=>(
+
+               <div key={item.id} className="table-item">
+
+                 {item.content}
+
+                 </div>
+
+             ))}
+
+             {provided.placeholder}
+
+           </div>
+
+         )}
+
+       </Droppable> 
+
+       </div>
+
+       </div>
+
+       <DragDropContext onDragEnd={onDragEnd}></DragDropContext>
+
+       </div>
+
+ );
+
+             }
+
+export default App;import React,{ useState } from 'react';
+
+import './App.css';
+
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+
+ 
+
+const initialItems = [
+
+ {id: 'item-1', content:'Item 1' },
+
+ {id: 'item-2', content:'Item 2' },
+
+ {id: 'item-3', content:'Item 3' },
+
+ // add more items if needed
+
+];
+
+ 
+
+const initialTables = {
+
+ table1: [],
+
+ table2: [],
+
+};
+
+ 
+
+function App() {
+
+ const [items, setItems] = useState(initialItems);
+
+ const [tables,setTables] = useState(initialTables);
+
+ 
+
+ const onDragEnd = (result) => {
+
+   if (!result.destination) return;
+
+ 
+
+   const { source, destination } = result;
+
+   const draggedItem = items.find((item) => item.id === result.draggable.Id);
+
+   if (source.droppableId === destination.droppableId){
+
+     //reordering within same list
+
+     const newItems =[...items];
+
+     newItems.splice(source.index, 1);
+
+     newItems.splice(destination.index,0,draggedItem);
+
+     setItems(newItems);
+
+ 
+
+   } else {
+
+     //moving from one table to another
+
+     const newTables = { ...tables };
+
+     newTables[destination.droppableId] = [
+
+       ...tables[destination.droppableId],
+
+       draggedItem,
+
+     ];
+
+     setTables(newTables);
+
+ 
+
+   }
+
+ };
+
+ return(
+
+   <div className="App">
+
+     <h1> Drag and Drop example</h1>
+
+     <div className="container">
+
+       <Droppable droppableId="items" direction= "vertical">
+
+         {(provided)=>(
+
+           <div
+
+           ref={provided.innerRef}
+
+           {...provided.droppableProps}
+
+           className="items-list"
+
+           >
+
+             {items.map((item, index)=>(
+
+               <Draggable key={item.id} draggableId={item.id} index={index}>
+
+                 {(provided)=> (
+
+                   <div
+
+                   ref={provided.innerRef}
+
+                   {...provided.draggableProps}
+
+                   {...provided.dragHandleProps}
+
+                   className="item"
+
+                   >
+
+                     {item.content}
+
+                   </div>
+
+                 )}
+
+               </Draggable>
+
+             ))}
+
+             {provided.placeholder}
+
+             </div>
+
+         )}
+
+       </Droppable>
+
+     <div className="tables">
+
+       <Droppable droppableId="table1" direction="vertical">
+
+         {(provided) => (
+
+           <div
+
+           ref={provided.innerRef}
+
+           {...provided.droppableProps}
+
+           className="table"
+
+           >
+
+             <h2> Table 1</h2>
+
+             {tables.table1.map((item, index)=>(
+
+               <div key={item.id} className="table-item">
+
+                 {item.content}
+
+                 </div>
+
+             ))}
+
+             {provided.placeholder}
+
+           </div>
+
+         )}
+
+       </Droppable>
+
+       <Droppable droppableId="table2" direction="vertical">
+
+         {(provided) => (
+
+           <div
+
+           ref={provided.innerRef}
+
+           {...provided.droppableProps}
+
+           className="table"
+
+           >
+
+             <h2> Table 2</h2>
+
+             {tables.table2.map((item, index)=>(
+
+               <div key={item.id} className="table-item">
+
+                 {item.content}
+
+                 </div>
+
+             ))}
+
+             {provided.placeholder}
+
+           </div>
+
+         )}
+
+       </Droppable> 
+
+       </div>
+
+       </div>
+
+       <DragDropContext onDragEnd={onDragEnd}></DragDropContext>
+
+       </div>
+
+ );
+
+             }
+
+export default App;import React,{ useState } from 'react';
+
+import './App.css';
+
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+
+ 
+
+const initialItems = [
+
+ {id: 'item-1', content:'Item 1' },
+
+ {id: 'item-2', content:'Item 2' },
+
+ {id: 'item-3', content:'Item 3' },
+
+ // add more items if needed
+
+];
+
+ 
+
+const initialTables = {
+
+ table1: [],
+
+ table2: [],
+
+};
+
+ 
+
+function App() {
+
+ const [items, setItems] = useState(initialItems);
+
+ const [tables,setTables] = useState(initialTables);
+
+ 
+
+ const onDragEnd = (result) => {
+
+   if (!result.destination) return;
+
+ 
+
+   const { source, destination } = result;
+
+   const draggedItem = items.find((item) => item.id === result.draggable.Id);
+
+   if (source.droppableId === destination.droppableId){
+
+     //reordering within same list
+
+     const newItems =[...items];
+
+     newItems.splice(source.index, 1);
+
+     newItems.splice(destination.index,0,draggedItem);
+
+     setItems(newItems);
+
+ 
+
+   } else {
+
+     //moving from one table to another
+
+     const newTables = { ...tables };
+
+     newTables[destination.droppableId] = [
+
+       ...tables[destination.droppableId],
+
+       draggedItem,
+
+     ];
+
+     setTables(newTables);
+
+ 
+
+   }
+
+ };
+
+ return(
+
+   <div className="App">
+
+     <h1> Drag and Drop example</h1>
+
+     <div className="container">
+
+       <Droppable droppableId="items" direction= "vertical">
+
+         {(provided)=>(
+
+           <div
+
+           ref={provided.innerRef}
+
+           {...provided.droppableProps}
+
+           className="items-list"
+
+           >
+
+             {items.map((item, index)=>(
+
+               <Draggable key={item.id} draggableId={item.id} index={index}>
+
+                 {(provided)=> (
+
+                   <div
+
+                   ref={provided.innerRef}
+
+                   {...provided.draggableProps}
+
+                   {...provided.dragHandleProps}
+
+                   className="item"
+
+                   >
+
+                     {item.content}
+
+                   </div>
+
+                 )}
+
+               </Draggable>
+
+             ))}
+
+             {provided.placeholder}
+
+             </div>
+
+         )}
+
+       </Droppable>
+
+     <div className="tables">
+
+       <Droppable droppableId="table1" direction="vertical">
+
+         {(provided) => (
+
+           <div
+
+           ref={provided.innerRef}
+
+           {...provided.droppableProps}
+
+           className="table"
+
+           >
+
+             <h2> Table 1</h2>
+
+             {tables.table1.map((item, index)=>(
+
+               <div key={item.id} className="table-item">
+
+                 {item.content}
+
+                 </div>
+
+             ))}
+
+             {provided.placeholder}
+
+           </div>
+
+         )}
+
+       </Droppable>
+
+       <Droppable droppableId="table2" direction="vertical">
+
+         {(provided) => (
+
+           <div
+
+           ref={provided.innerRef}
+
+           {...provided.droppableProps}
+
+           className="table"
+
+           >
+
+             <h2> Table 2</h2>
+
+             {tables.table2.map((item, index)=>(
+
+               <div key={item.id} className="table-item">
+
+                 {item.content}
+
+                 </div>
+
+             ))}
+
+             {provided.placeholder}
+
+           </div>
+
+         )}
+
+       </Droppable> 
+
+       </div>
+
+       </div>
+
+       <DragDropContext onDragEnd={onDragEnd}></DragDropContext>
+
+       </div>
+
+ );
+
+             }
+
+export default App;
 
 

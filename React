@@ -166,7 +166,8 @@ import React, { useState, useRef, useCallback } from 'react';
 import "./index.css";
 
 import MenuIcon from '@mui/icons-material/Menu';
-function Costpanel() {
+function Costpanel({updateCenterContentMargin}) {
+   
 const costsidebarRef = useRef(null);
  
  const [isCostPanelresizing, setIsCostPanelresizing] = useState(false);
@@ -228,11 +229,12 @@ const costsidebarRef = useRef(null);
    
 
     // Ensure the new width doesn't go below the minimum or above the maximum
-    // newWidth = Math.max(minCostPanelWidth, newWidth);
-    // newWidth = Math.min(300, newWidth);
+    newWidth = Math.max(minCostPanelWidth, newWidth);
+   
 
     setCostPanelWidth(newWidth);
     isCostPanelresizing.initialX = mouseX;
+   updateCenterContentMargin(newWidth);
   }
 };
  React.useEffect(() => {
@@ -317,6 +319,14 @@ const DnDFlow = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
+  const [centerContentMargin,setCenterContentMargin]=useState(0);
+  const [costPanelWidth,setCostPanelWidth]=useState(261);
+  
+  const updateCenterContentMargin=(newWidth)=>{
+    const margin=300-newWidth;
+    reactFlowWrapper.current.style.marginLeft=`${margin}px`;
+    setCostPanelWidth(margin);
+  }
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
 
@@ -358,7 +368,8 @@ const DnDFlow = () => {
       <ReactFlowProvider>
       <Sidebar />
       
-        <div className="reactflow-wrapper" ref={reactFlowWrapper} style={{ height: 900 }}>
+     
+      <div className="reactflow-wrapper" ref={reactFlowWrapper} style={{ height: 900 }}>
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -374,7 +385,11 @@ const DnDFlow = () => {
           </ReactFlow>
           
         </div>
-        <Costpanel/>
+     
+        <Costpanel updateCenterContentMargin={updateCenterContentMargin}/>
+    
+      
+       
         
       </ReactFlowProvider>
        </div>
@@ -382,6 +397,7 @@ const DnDFlow = () => {
 };
 
 export default DnDFlow;
+
 
 import { render, screen } from '@testing-library/react';
 import App from './App';

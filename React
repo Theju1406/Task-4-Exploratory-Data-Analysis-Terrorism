@@ -1,173 +1,197 @@
+/* eslint-disable import/no-anonymous-default-export */
+//side bar
+
 import React, { useState, useRef, useCallback } from 'react';
-import "../index.css";
-import "./tree.css"
+import "./index.css";
+
 import MenuIcon from '@mui/icons-material/Menu';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import CloseIcon from '@mui/icons-material/Close';
-import { CardContent } from '@mui/material';
-import { FlareSharp } from '@mui/icons-material';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 
-function Elements({id,element}){
-  const [{isDragging},drag]=useDrag(()=>({
-      type:"elements",
-      item: { id },
-      collect:(monitor)=>({
-          isDragging:monitor.isDragging(),
-      }),
-      onDragStart:(e)=>{
-        e.preventDefault();
-        e.stopPropagation();
-    },
-  }));
-  return(
-      <div className="sidebar-element"
-      ref={drag}  style={{opacity: isDragging ? 0.5 : 1 }}>
-    
-          {element}
-
-      </div>
-  )
-}
-
-
-
-
-
-
-
-function Pricemodel() {
-  const boxStyle = {
-    border: '1px solid #000', // Add a border around the text
-    padding: '2px', // Add some padding for spacing
-    display: 'inline-block',
-     
-    // Make sure the box doesn't take the full width
+export default () => {
+  const onDragStart = (event, nodeType) => {
+    event.dataTransfer.setData('application/reactflow', nodeType);
+    event.dataTransfer.effectAllowed = 'move';
   };
-  const sidebarElements = [
-    {id:1,
-    element:"Materials"
-    },
-    {id:2,
-        element:"Feedstock"
-        },
-        {id:3,
-            element:"Feedstock"
-            },
-            {id:4,
-                element: "Fees"
-                },
-                {id:5,
-                    element:"Conversion"
-                    } ,
-                    {id:6,
-                        element: "Equipment",
-                        },
-                         {id:7,
-                            element:"Energy"
-                            } ,
-                            {id:8,
-                                element:"Logistics"
-                                },
-                                {id:9,
-                                    element:"Lane"
-                                    },
-                                    {id:10,
-                                        element:"Warehousing"
-                                        },
-                                    ];
- const sidebarRef = useRef(null);
- const boxContainerRef = useRef(null); // Added ref for the box container
+  const sidebarRef = useRef(null);
+ 
  const [isResizing, setIsResizing] = useState(false);
  const [sidebarWidth, setSidebarWidth] = useState(261);
-
- const costsidebarRef = useRef(null);
  const minSidebarWidthWithText = 100;
- const [isCostPanelresizing, setIsCostPanelresizing] = useState({ resizing: false, initialX: 0 });
-
- const [costPanelWidth, setCostPanelWidth] = useState(261);
- const minCostPanelWidth = 50;
-
- const bottomsidebarRef = useRef(null);
- 
- 
- const [isBottomPanelresizing, setIsBottomPanelresizing] = useState(false);
- const [BottomPanelheight, setBottomPanelheight] = useState(145); // Corrected variable name
- const minBottomPanelheight = 100; // Corrected variable name
  const [isCollapsed,setIsCollapsed]=useState(false);
- const [isFormulaBarVisible, setFormulaBarVisible] = useState(false);
- const [isReferenceVisible, setReferenceVisible] = useState(false);
- const [isBottomSidebarOpen, setBottomSidebarOpen] = useState(true);
- const [isOpen,setIsOpen]=useState(true);
- 
-const [isDragging, setIsDragging] = useState(false);
-const [initialMouseY, setInitialMouseY] = useState(0);
-const [bottomPanelY, setBottomPanelY] = useState(0);
-
-const startDragging = (e) => {
-  setIsDragging(true);
-  setInitialMouseY(e.clientY);
-};
-
-
-
- const showFormulaBar = () => {
-  setFormulaBarVisible(true);
-  setReferenceVisible(false);
-  setBottomSidebarOpen(true);
-};
-
-const showReference = () => {
-  setFormulaBarVisible(false);
-  setReferenceVisible(true);
-  setBottomSidebarOpen(true);
-};
-
-const closeBottomSidebar = () => {
-  setBottomSidebarOpen(false);
-};
-const openbottombar=()=>{
-  setIsOpen(true);
-}
- 
- 
  const startResizing = React.useCallback((mouseDownEvent) => {
   setIsResizing(true);
  }, []);
+ const stopResizing = React.useCallback(() => {
+  setIsResizing(false);
+ }, []);
+ const togglesidePanel = () => {
+  if (sidebarWidth <= minSidebarWidthWithText) {
+    // If the sidebar is at the minimum width, expand it
+    setSidebarWidth(261); // Set the desired width when expanded
+  } else {
+    setIsCollapsed(!isCollapsed);
+  }
+};
+const togglesidePanelclose = () => {
+  if (sidebarWidth > minSidebarWidthWithText) {
+    // If the sidebar is at the minimum width, expand it
+    setSidebarWidth(50); // Set the desired width when expanded
+  } else {
+    setIsCollapsed(isCollapsed);
+  }
+};
+const resize = React.useCallback(
+  (mouseMoveEvent) => {
+   if (isResizing) {
+    const newWidth =
+     mouseMoveEvent.clientX -
+     sidebarRef.current.getBoundingClientRect().left;
+    setSidebarWidth(newWidth);
+    
+   }
+  },
+  [isResizing]
+ );
+ React.useEffect(() => {
+  window.addEventListener("mousemove", resize);
+  window.addEventListener("mouseup", stopResizing);
+  return () => {
+   window.removeEventListener("mousemove", resize);
+   window.removeEventListener("mouseup", stopResizing);
+  };
+ }, [resize, stopResizing]);
 
- const startCostPanelResizing = (mouseDownEvent) => {
+
+  return (
+    <div
+    ref={sidebarRef}
+    className={`app-sidebar ${isCollapsed?'collapsed':``}`}
+    style={{ width: sidebarWidth }}
+   
+   >
+    <div className="app-sidebar-content">
+     <div
+      className='logotext'
+      style={{ textAlign: 'center', marginLeft: sidebarWidth > minSidebarWidthWithText ? "6px" : "10px" }}
+     >
+      {sidebarWidth > minSidebarWidthWithText || isResizing || isCollapsed? (
+        <div>
+       <div
+        className="heading-box mt-3"
+        style={{
+         display: 'flex',
+         alignItems: 'center',
+         width: { sidebarWidth },
+         position: "relative",
+    
+        }}
+       >
+        <MenuIcon style={{ marginRight: '10px', color: "black" }} onClick={togglesidePanelclose}/>
+        <h4 className="mt-2" style={{ marginLeft: "15px", color: "black" }}>Price Model</h4>
+       </div>
+      
+      
+
+  
+      <div className="dndnode input" onDragStart={(event) => onDragStart(event, 'Price Model')} draggable>
+        Price Model
+      </div>
+      <div className="dndnode" onDragStart={(event) => onDragStart(event, 'Total Materials')} draggable>
+        Total Materials
+      </div>
+      <div className="dndnode" onDragStart={(event) => onDragStart(event, 'Logistics')} draggable>
+        Logistics
+      </div>
+      <div className="dndnode" onDragStart={(event) => onDragStart(event, 'Raw Material')} draggable>
+        Raw Material
+      </div>
+      <div className="dndnode" onDragStart={(event) => onDragStart(event, 'Packing')} draggable>
+        Packing
+      </div>
+      <div className="dndnode" onDragStart={(event) => onDragStart(event, 'a1')} draggable>
+        a1
+      </div>
+      <div className="dndnode" onDragStart={(event) => onDragStart(event, 'a2')} draggable>
+        a2
+      </div>
+      <div className="dndnode" onDragStart={(event) => onDragStart(event, 'a3')} draggable>
+        a3
+      </div>
+      <div className="dndnode" onDragStart={(event) => onDragStart(event, 'a4')} draggable>
+        a4
+      </div>
+      <div className="dndnode" onDragStart={(event) => onDragStart(event, 'a5')} draggable>
+        a5
+      </div>
+      <div className="dndnode output" onDragStart={(event) => onDragStart(event, 'Last Node')} draggable>
+        Last Node
+      </div>
+     
+    
+   
+ 
+      
+    
+      
+       
+      
+
+
+     
+    
+
+      </div>
+
+      ) : (
+       <MenuIcon onClick={togglesidePanel}/>)
+      }
+
+
+     </div>
+    
+
+    
+     
+    
+    
+     
+     
+    </div>
+    <div className="app-sidebar-resizer" onMouseDown={startResizing} />
+   </div>
+   
+  );
+};
+//cost panel
+import React, { useState, useRef, useCallback } from 'react';
+import "./index.css";
+
+import MenuIcon from '@mui/icons-material/Menu';
+function Costpanel() {
+const costsidebarRef = useRef(null);
+ 
+ const [isCostPanelresizing, setIsCostPanelresizing] = useState(false);
+
+ const [costPanelWidth, setCostPanelWidth] = useState(261);
+ const minCostPanelWidth = 100;
+
+
+ const [isCollapsed,setIsCollapsed]=useState(false);
+  const startCostPanelResizing = (mouseDownEvent) => {
   setIsCostPanelresizing({
     resizing: true,
     initialX: mouseDownEvent.clientX,
   });
 };
 
- const stopResizing = React.useCallback(() => {
-  setIsResizing(false);
- }, []);
+ 
 
  const stopCostPanelResizing = () => {
   setIsCostPanelresizing( false);
 };
 
 
- const togglesidePanel = () => {
-    if (sidebarWidth <= minSidebarWidthWithText) {
-      // If the sidebar is at the minimum width, expand it
-      setSidebarWidth(261); // Set the desired width when expanded
-    } else {
-      setIsCollapsed(!isCollapsed);
-    }
-  };
-  const togglesidePanelclose = () => {
-    if (sidebarWidth > minSidebarWidthWithText) {
-      // If the sidebar is at the minimum width, expand it
-      setSidebarWidth(50); // Set the desired width when expanded
-    } else {
-      setIsCollapsed(isCollapsed);
-    }
-  };
+
+ 
   const toggleCostPanel = () => {
     if (costPanelWidth <= minCostPanelWidth) {
       // If the cost sidebar is at the minimum width, expand it
@@ -185,56 +209,23 @@ const openbottombar=()=>{
     }
 }
 
-const startBottomPanelResizing = (mouseDownEvent) => {
-    setIsBottomPanelresizing({
-      initialHeight: BottomPanelheight,
-      mouseY: mouseDownEvent.clientY,
-    });
-  };
-  
-  const stopBottomPanelResizing = () => {
-    setIsBottomPanelresizing(false);
-  };
-  
-  const toggleBottomPanel = () => {
-    if (BottomPanelheight <= minBottomPanelheight) {
-      setBottomPanelheight(300); // Set the desired maximum height when expanded
-    } else {
-      setBottomPanelheight(minBottomPanelheight); // Set the minimum height when collapsed
-    }
-  };
 
-   
-  const toggleBottomPanelclose = () => {
-    if (BottomPanelheight > minBottomPanelheight) {
-      // If the sidebar is at the minimum width, expand it
-      setBottomPanelheight(50); // Set the desired width when expanded
-    } else {
-        setIsBottomPanelresizing(isBottomPanelresizing);
-    }
-}
   
 
- const resize = React.useCallback(
-  (mouseMoveEvent) => {
-   if (isResizing) {
-    const newWidth =
-     mouseMoveEvent.clientX -
-     sidebarRef.current.getBoundingClientRect().left;
-    setSidebarWidth(newWidth);
-    
-   }
-  },
-  [isResizing]
- );
+  
+
+
 
  const costresize = (mouseMoveEvent) => {
-  if (isCostPanelresizing.resizing) {
+  if (isCostPanelresizing) {
     const mouseX = mouseMoveEvent.clientX;
     const initialX = isCostPanelresizing.initialX;
     const deltaX = mouseX - initialX;
 
-    let newWidth = costPanelWidth - deltaX;
+    let newWidth = costPanelWidth- deltaX;
+    
+   
+   
 
     // Ensure the new width doesn't go below the minimum or above the maximum
     // newWidth = Math.max(minCostPanelWidth, newWidth);
@@ -244,49 +235,6 @@ const startBottomPanelResizing = (mouseDownEvent) => {
     isCostPanelresizing.initialX = mouseX;
   }
 };
-
-
-  const bottomresize = (mouseMoveEvent) => {
-    if (isBottomPanelresizing) {
-      const mouseX = mouseMoveEvent.clientX;
-      const initialX = isBottomPanelresizing.mouseX;
-      const deltaX = mouseX - initialX;
-
-      let newWidth = isBottomPanelresizing.initialWidth + deltaX;
-
-      // Ensure the new width doesn't go below the minimum or above the maximum
-      newWidth = Math.max(minBottomPanelheight, newWidth);
-      newWidth = Math.min(200, newWidth); // Set the maximum width as needed
-
-      setBottomPanelheight(newWidth);
-    }
-  };
-  
-  
-  
-  
-  
-  
-
- 
-
- 
-
- 
- 
- 
- 
-
- React.useEffect(() => {
-  window.addEventListener("mousemove", resize);
-  window.addEventListener("mouseup", stopResizing);
-  return () => {
-   window.removeEventListener("mousemove", resize);
-   window.removeEventListener("mouseup", stopResizing);
-  };
- }, [resize, stopResizing]);
-
- 
  React.useEffect(() => {
   window.addEventListener("mousemove", costresize);
   window.addEventListener("mouseup", stopCostPanelResizing);
@@ -295,144 +243,8 @@ const startBottomPanelResizing = (mouseDownEvent) => {
    window.removeEventListener("mouseup", stopCostPanelResizing);
   };
  }, [costresize, stopCostPanelResizing]);
-
- React.useEffect(() => {
-  window.addEventListener("mousemove",  bottomresize);
-  window.addEventListener("mouseup", stopBottomPanelResizing);
-  return () => {
-    window.removeEventListener("mousemove",  bottomresize);
-    window.removeEventListener("mouseup", stopBottomPanelResizing);
-  };
-}, [bottomresize, stopBottomPanelResizing]);
-
-React.useEffect(() => {
-  window.addEventListener('mouseup', () => setIsDragging(false));
-  return () => window.removeEventListener('mouseup', () => setIsDragging(false));
-}, []);
-
-
-
- return (
-   <div className="app-container">
-     
-   <div
-    ref={sidebarRef}
-    className={`app-sidebar ${isCollapsed?'collapsed':``}`}
-    style={{ width: sidebarWidth }}
-    onMouseDown={(e) => e.preventDefault()}
-   >
-    <div className="app-sidebar-content">
-     <div
-      className='logotext'
-      style={{ textAlign: 'center', marginLeft: sidebarWidth > minSidebarWidthWithText ? "6px" : "10px" }}
-     >
-      {sidebarWidth > minSidebarWidthWithText || isResizing || isCollapsed? (
-        <div>
-       <div
-        className="heading-box mt-1"
-        style={{
-         display: 'flex',
-         alignItems: 'center',
-         width: { sidebarWidth },
-         position: "relative",
-         background: "linear-gradient(90deg,rgb(50,30,100) 20%,rgb(0,0,0) 100%",
-        }}
-       >
-        <MenuIcon style={{ marginRight: '10px', color: "white" }} onClick={togglesidePanelclose}/>
-        <h6 className="mt-2" style={{ marginLeft: "10px", color: "White" }}>Price Model</h6>
-       </div>
-      
-       
-      
-
-
-     
-    
-
-      </div>
-
-      ) : (
-       <MenuIcon onClick={togglesidePanel}/>)
-      }
-
-
-     </div>
-     <div className="sidebar-elements">
-        {sidebarElements.map((elementname) => {
-          return  (
-            <Elements element={elementname.element} id={elementname.id}/>)
-
-        })}
-        </div>
-    
-     
-     
-    </div>
-    <div className="app-sidebar-resizer" onMouseDown={startResizing} />
-   </div>
-   
-   <div className="app-frame">
-   
-      
-    {isBottomSidebarOpen&&(
- 
-    <div
-        ref={bottomsidebarRef}
-        className={`bottom-app-sidebar vertical ${isCollapsed ? 'collapsed' : ''}`}
-        style={{ height: BottomPanelheight}}
-        onMouseDown={(e) => {
-          e.preventDefault();
-          startDragging(e);
-        }}
-        onMouseMove={(e) => {
-          if (isDragging) {
-            setBottomPanelY(e.clientY - initialMouseY);
-          }}}
-       
-      >
-        
-       
-        <div className="bottom-app-sidebar-content" style={{disply:"flex"}}>
-        <div className="bottom-app-sidebar-resizer" onMouseDown={startBottomPanelResizing} />
-          <div className='bottom-box' style={{height:"30px",display:"flex"}} ref={bottomsidebarRef}>
-            <h6 style={{color:"white"}}  onClick={showFormulaBar}>Formula Bar</h6>
-            <h6 style={{color:"white",marginLeft:"20px"}}  onClick={showReference}>Reference Material</h6>
-            <CloseIcon className="close-icon" style={{marginLeft: sidebarWidth, marginRight:costPanelWidth}} onClick={closeBottomSidebar} />
-
-            </div>
-
-            {isFormulaBarVisible && (
-        <div className="text-center mt-1">
-          <h6 style={{ alignItems: "center", color: "black" }}>Formula Bar</h6>
-          <h6>
-            <i>ability to modify formula of child elements</i>
-          </h6>
-          <h6>Raw Materials = Sum of (Feedstock 1, Feedstock 2, ...)</h6>
-        </div>
-      )}
-
-        {isReferenceVisible&&(<div className='text-center mt-1'> <h6 style={{alighItem:"center",color: "black"}} >
-            Reference Material(92154554)
-           </h6>
-           <h6>
-           <i>slow current calculation based on selected element</i> 
-           </h6>
-           <h6>Raw Material Cost=Sum of(Feedstock 1(3.5), Feedstock 2(5.0))</h6>
-           </div>)}
-           
-
-         
-        </div>
-      </div>
-      )}
-      
-
-      </div>
-   
-     
-
-
-      <div
+return (
+  <div
   ref={costsidebarRef}
   className="right-app-sidebar"
   style={{
@@ -456,11 +268,11 @@ React.useEffect(() => {
             alignItems: 'center',
             width: costPanelWidth,
             position: "relative",
-            background: "linear-gradient(90deg,rgb(50,30,100) 20%,rgb(0,0,0) 100%",
+           
           }}
         >
-          <MenuIcon style={{ marginRight: '10px', color: "white" }} onClick={togglecostPanelclose} />
-          <h6 className="mt-2" style={{ marginLeft: "10px", color: "White" }}>Costing Panel</h6>
+          <MenuIcon style={{ marginRight: '10px', color: "black" }} onClick={togglecostPanelclose} />
+          <h4 className="mt-2" style={{ marginLeft: "10px", color: "black" }}>Costing Panel</h4>
         </div>
       ) : (
         <MenuIcon onClick={toggleCostPanel} />
@@ -468,18 +280,301 @@ React.useEffect(() => {
     </div>
   </div>
 </div>
-
-
-  
-   
-  
-    
-
-
-  
-   </div>
-  
- );
+);
 }
 
-export default Pricemodel;
+export default Costpanel;
+
+import React, { useState, useRef, useCallback } from 'react';
+import ReactFlow, {
+  ReactFlowProvider,
+  addEdge,
+  useNodesState,
+  useEdgesState,
+  Controls,
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+
+import Sidebar from './Sidebar';
+import Costpanel from './costpanel';
+
+import './index.css';
+
+const initialNodes = [
+  {
+    id: '1',
+    type: 'input',
+    data: { label: 'Price Model' },
+    position: { x: 250, y: 5 },
+  },
+];
+
+let id = 0;
+const getId = () => `dndnode_${id++}`;
+
+const DnDFlow = () => {
+  const reactFlowWrapper = useRef(null);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [reactFlowInstance, setReactFlowInstance] = useState(null);
+
+  const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
+
+  const onDragOver = useCallback((event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
+
+  const onDrop = useCallback(
+    (event) => {
+      event.preventDefault();
+
+      const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
+      const type = event.dataTransfer.getData('application/reactflow');
+
+      // check if the dropped element is valid
+      if (typeof type === 'undefined' || !type) {
+        return;
+      }
+
+      const position = reactFlowInstance.project({
+        x: event.clientX - reactFlowBounds.left,
+        y: event.clientY - reactFlowBounds.top,
+      });
+      const newNode = {
+        id: getId(),
+        type,
+        position,
+        data: { label: `${type} ` },
+      };
+
+      setNodes((nds) => nds.concat(newNode));
+    },
+    [reactFlowInstance]
+  );
+
+  return (
+    <div className="dndflow">
+      <ReactFlowProvider>
+      <Sidebar />
+      
+        <div className="reactflow-wrapper" ref={reactFlowWrapper} style={{ height: 900 }}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onInit={setReactFlowInstance}
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            fitView
+          >
+            <Controls />
+          </ReactFlow>
+          
+        </div>
+        <Costpanel/>
+        
+      </ReactFlowProvider>
+       </div>
+  );
+};
+
+export default DnDFlow;
+
+import { render, screen } from '@testing-library/react';
+import App from './App';
+
+test('renders learn react link', () => {
+  render(<App />);
+  const linkElement = screen.getByText(/learn react/i);
+  expect(linkElement).toBeInTheDocument();
+});
+.dndflow {
+  flex-direction: column;
+  display: flex;
+  flex-grow: 1;
+  height: 100%;
+}
+
+.dndflow aside {
+  border-right: 1px solid #eee;
+  padding: 15px 10px;
+  font-size: 12px;
+  background: #fcfcfc;
+}
+
+.dndflow aside .description {
+  margin-bottom: 10px;
+}
+
+.dndflow .dndnode {
+  height: 20px;
+  padding: 4px;
+  border: 1px solid #1a192b;
+  border-radius: 2px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+  width:150px;
+  margin-left: 45px;
+}
+
+.dndflow .dndnode.input {
+  border-color: #0041d0;
+  margin-top: 10px;
+}
+
+.dndflow .dndnode.output {
+  border-color: #ff0072;
+}
+
+.dndflow .reactflow-wrapper {
+  flex-grow: 1;
+  height: 100%;
+  
+}
+
+.dndflow .selectall {
+  margin-top: 10px;
+}
+
+@media screen and (min-width: 768px) {
+  .dndflow {
+    flex-direction: row;
+  }
+
+  .dndflow aside {
+    width: 20%;
+    max-width: 250px;
+  }
+}
+.react-flow__node-default, .react-flow__node-input, .react-flow__node-output, .react-flow__node-group {
+  padding: 5px !important;
+  border-radius: 3px;
+  width: 60px !important;
+  font-size: 7px !important;
+  color: #222;
+  text-align: center;
+  border-width: 0.2px !important;
+  border-style: solid;
+  border-color: #1a192b;
+  background-color: white;
+}
+.react-flow__attribution {
+  font-size: 0px !important;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 2px 3px;
+  margin: 0;
+}
+
+.app-sidebar {
+  flex-grow: 0;
+  flex-shrink: 0;
+  min-width: 50px;
+  max-width: 300px;
+  display: flex;
+  border-right: 1px solid #e9e9e9;
+  flex-direction: row;
+  background: #ffffff;
+  box-shadow: -8px 2px 22px -7px rgba(0, 0, 0, 0.25);
+  border-radius: 10px 0px 0px 10px;
+  z-index: 2;
+  overflow: hidden;
+  position: "relative";
+  
+}
+.app-sidebar .app-sidebar-content {
+  flex: 1;
+  overflow: hidden;
+  position: "relative";
+  align-items: "center";
+margin-left: "20px";
+}
+
+.app-sidebar .app-sidebar-resizer {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 6px;
+  justify-self: flex-end;
+  cursor: col-resize;
+  resize: horizontal;
+  overflow: hidden;
+  position: "relative"
+}
+
+.app-sidebar .app-sidebar-resizer:hover {
+  width: 3px;
+  background: #c1c3c5b4;
+  overflow: hidden;
+  position: "relative"
+}
+
+.heading-box {
+  background-color: #f2f2f2;
+  padding: 8px;
+  overflow: hidden;
+  height:50px;
+  width:200px;
+  margin-top: 10px;
+  background-color:antiquewhite;
+  margin-left: 20px;
+ }
+ .elements{
+  margin-top: 10px;
+ }
+
+ .right-app-sidebar {
+  flex-grow: 0;
+  flex-shrink: 0;
+  min-width: 50px;
+  max-width: 300px;
+  display: flex;
+  border-right: 1px solid #e9e9e9;
+  flex-direction: row;
+  background: #ffffff;
+  box-shadow: -8px 2px 22px -7px rgba(0, 0, 0, 0.25);
+  border-radius: 0px 10px 10px 0px;
+  z-index: 2;
+  overflow: hidden;
+  padding-right: 20px;
+ 
+}
+
+.right-app-sidebar .right-app-sidebar-content {
+  flex: 1;
+  overflow: hidden;
+  position: "relative"
+}
+
+.right-app-sidebar .right-app-sidebar-resizer {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 6px;
+  justify-self: flex-end;
+  cursor: col-resize;
+  resize: horizontal;
+  overflow: hidden;
+  position: "relative"
+  
+}
+
+.right-app-sidebar .right-app-sidebar-resizer:hover {
+  width: 3px;
+  background: #c1c3c5b4;
+  
+  
+}
+.right-heading-box {
+  background-color: #f2f2f2;
+  padding: 8px;
+  overflow: hidden;
+  height:50px;
+  width:200px;
+  margin-top: 10px;
+  background-color:antiquewhite;
+  margin-left: 20px;
+ }

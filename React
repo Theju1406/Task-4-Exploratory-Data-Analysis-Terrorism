@@ -1,3 +1,16 @@
+Cannot read properties of null (reading 'removeEventListener')
+TypeError: Cannot read properties of null (reading 'removeEventListener')
+    at http://localhost:3001/static/js/bundle.js:1249:28
+    at safelyCallDestroy (http://localhost:3001/static/js/bundle.js:40764:9)
+    at commitHookEffectListUnmount (http://localhost:3001/static/js/bundle.js:40902:15)
+    at invokePassiveEffectUnmountInDEV (http://localhost:3001/static/js/bundle.js:42678:17)
+    at invokeEffectsInDev (http://localhost:3001/static/js/bundle.js:44531:15)
+    at commitDoubleInvokeEffectsInDEV (http://localhost:3001/static/js/bundle.js:44510:11)
+    at flushPassiveEffectsImpl (http://localhost:3001/static/js/bundle.js:44287:9)
+    at flushPassiveEffects (http://localhost:3001/static/js/bundle.js:44225:18)
+    at commitRootImpl (http://localhost:3001/static/js/bundle.js:44184:9)
+    at commitRoot (http://localhost:3001/static/js/bundle.js:43967:9)
+
 import React, { useState, useRef, useCallback } from 'react';
 import ReactFlow, {
   ReactFlowProvider,

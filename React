@@ -1109,13 +1109,14 @@ const resize = React.useCallback(
   margin: 50px auto;
 }
 
- .box1 {
+.box1 {
   width: 100px;
   height: 50px;
   background-color: #ccc;
   position: absolute;
   top: 50px;
   left: 100px;
+  bottom:0px;
   border-radius: 5px;
   text-align: center;
 }
@@ -1126,35 +1127,40 @@ const resize = React.useCallback(
   background-color: #ccc;
   position: absolute;
   top: 50px;
-  left: 400px;
+  bottom:0px;
+  left: 385px;
   border-radius: 5px;
   text-align: center;
 }
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 400px;
+  margin: 50px auto;
+}
+
+
 
 .line {
-  position: relative;
-  height: 2px; /* Adjust based on your line thickness */
-  width: 100px; /* Adjust based on your line length */
+  position: absolute;
+  top:75px;
+  left: 200px;
+  
+  height:2px; /* Adjust based on your line thickness */
+  width: 175px; /* Adjust based on your line length */
   background-color: black; /* Adjust line color */
 }
 
-.line::before,
+
 .line::after {
   content: '';
   position: absolute;
-  top: -5px; /* Adjust arrow position */
-  width: 0;
+  top: -7px; /* Adjust arrow position */
+  width: 0px;
   height: 0;
   border-top: 8px solid transparent; /* Adjust arrow size */
   border-bottom: 8px solid transparent; /* Adjust arrow size */
-}
-
-.line::before {
-  left: -10px; /* Adjust arrow position */
-  border-right: 12px solid black; /* Adjust arrow color and size */
-}
-
-.line::after {
-  right: -10px; /* Adjust arrow position */
+   right: -10px; /* Adjust arrow position */
   border-left: 12px solid black; /* Adjust arrow color and size */
 }

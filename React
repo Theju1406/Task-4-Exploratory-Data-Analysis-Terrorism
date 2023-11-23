@@ -1109,10 +1109,26 @@ const resize = React.useCallback(
   margin: 50px auto;
 }
 
-.box {
-  width: 50px;
+ .box1 {
+  width: 100px;
   height: 50px;
   background-color: #ccc;
+  position: absolute;
+  top: 50px;
+  left: 100px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.box2 {
+  width: 100px;
+  height: 50px;
+  background-color: #ccc;
+  position: absolute;
+  top: 50px;
+  left: 400px;
+  border-radius: 5px;
+  text-align: center;
 }
 
 .line {
